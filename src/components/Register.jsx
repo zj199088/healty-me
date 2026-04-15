@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const Register = () => {
@@ -9,6 +10,7 @@ const Register = () => {
   });
   
   const { register, error, loading } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -19,7 +21,10 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await register(formData.username, formData.email, formData.password);
+    const success = await register(formData.username, formData.email, formData.password);
+    if (success) {
+      navigate('/');
+    }
   };
 
   return (
