@@ -15,7 +15,7 @@ const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         if (token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          const res = await axios.get('http://localhost:5000/api/auth/me');
+          const res = await axios.get('/api/auth/me');
           setUser(res.data);
         }
       } catch (err) {
@@ -34,17 +34,30 @@ const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', {
+      console.log('Registering user:', username, email);
+      const res = await axios.post('/api/auth/register', {
         username,
         email,
         password
       });
+      console.log('Register response:', res.data);
       localStorage.setItem('token', res.data.token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-      const userRes = await axios.get('http://localhost:5000/api/auth/me');
-      setUser(userRes.data);
+      
+      try {
+        console.log('Fetching user info...');
+        const userRes = await axios.get('/api/auth/me');
+        console.log('User info:', userRes.data);
+        setUser(userRes.data);
+      } catch (userErr) {
+        console.error('Error fetching user info:', userErr);
+        setError('Registration successful, but failed to fetch user info');
+        return false;
+      }
+      
       return true;
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err.response?.data?.message || 'Registration failed');
       return false;
     } finally {
@@ -57,13 +70,13 @@ const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await axios.post('/api/auth/login', {
         email,
         password
       });
       localStorage.setItem('token', res.data.token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
-      const userRes = await axios.get('http://localhost:5000/api/auth/me');
+      const userRes = await axios.get('/api/auth/me');
       setUser(userRes.data);
       return true;
     } catch (err) {
